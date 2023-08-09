@@ -1,0 +1,43 @@
+# Report: Predict Bike Sharing Demand with AutoGluon Solution
+#### Kyle Schmidt
+
+## Initial Training
+### What did you realize when you tried to submit your predictions? What changes were needed to the output of the predictor to submit your results?
+When I first tried to submit my predictions, I noticed that the test dataset didn't have a 'count' label column. The test and training datasets need to be the same so I added a 'count' column and initialized the values to 0.
+
+The notebook outline stated to check for any predicted values less than 0 but when I checked in this initial round no values were less than 0 so I was ok to add my predictions to the submission dataset directly and submit.
+
+### What was the top ranked model that performed?
+The top ranked model that consistently prerformed the best was the 'WeightedEnsemble_L3' model.
+
+## Exploratory data analysis and feature creation
+### What did the exploratory analysis find and how did you add additional features?
+I ran `feature_importance` on the initial model to see what features worked best. From these results, I noted that 'datetime' and 'holiday' features were most important. Using that information, I tried to parse 'datetime' further into subcomponents, creating separate features for year, month, day, hour, and weekday. The 'holiday' column was already in a boolean format, indicating True/False if the day was a holiday and I attempted to turn season and weather into categorical features and creating separate dummy columns for those as well. However, season and weather didn't seem to have a large affect on model performance because after I created them, re-ran the model, and then again calculated feature importance, those new categorical dummy columns all ranked at the bottom.
+
+### How much better did your model preform after adding additional features and why do you think that is?
+My model performance improved a surprising amount largely due to splitting the datetime column. The model score improved from 52.98 to 30.37 after adding the additional features. Presumably this is better because 'datetime' isn't initially a numerical value that the model can work with. By spliting the datetime column (first a string into a datetime object and then into subcomponent numerical columns) this specicifically tells the model how to handle the datetime feature. Using the datetime, we were also able to create additional features in addition to our datetime splits. My additional feature 'weekday' was a good one to add whether the date was a weekend day or not.
+
+## Hyper parameter tuning
+### How much better did your model preform after trying different hyper parameters?
+I wasn't able to improve my model after trying to tune hyperparameters. I configured the model without any hyperparameters and a 10 minute time limit which provided the best model. I then tried to remove the time limit and set the hyperparameters to 'auto' but that made the score worse (I should caveat that it made the model score improve but the kaggle score didn't improve). My model improved from 30.36 to 29.10.
+
+### If you were given more time with this dataset, where do you think you would spend more time?
+Given more time, I might try to remove features and see if that helps since some features might be correlated and/or confusing the model. Including my new 'year' feature might be problematic if we're trying to predict future ridesharing volume, for example. Another thing that we were taught in the lessons was about normalizing data so that numerical data takes on a specific range of values. I didn't use that technique in my data cleansing and feature engineering but I might want to go back and try that out. I would have also liked to try other types of models and compare them against AutoGluon.
+
+### Create a table with the models you ran, the hyperparameters modified, and the kaggle score.
+|model|hpo1|hpo2|hpo3|score|
+|--|--|--|--|--|
+|initial|NULL|NULL|NULL|52.98|
+|add_features|NULL|NULL|NULL|30.37|
+|hpo|'num_bag_folds=5'|'num_bag_sets=1'|'num_stack_levels=1'|29.10|
+
+### Create a line plot showing the top model score for the three (or more) training runs during the project.
+
+![model_train_score.png](img/model_train_score.png)
+
+### Create a line plot showing the top kaggle score for the three (or more) prediction submissions during the project.
+
+![model_test_score.png](img/model_test_score.png)
+
+## Summary
+I learned a lot through this project and applied nearly everything I learned in the classes. I learned that feature engineering and data cleansing is probably the most important as that yielded the greatest improvement in model score. Hyperparameter tuning is also important but the data going into the model is what provided us the greatest boost. I also learned that AutoGluon performs reasonably well with the default hyperparameters and now I understand the power of AutoML frameworks and their ability to yield really good performance with minimal setup. Again, the data fed into them matters the most and by spending more time in data cleansing and feature engineering one can yield the greatest benefits.
